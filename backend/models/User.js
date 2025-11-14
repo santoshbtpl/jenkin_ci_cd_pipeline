@@ -49,7 +49,7 @@ const User = sequelize.define('user', {
   },
   facility_id: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
     validate: { notEmpty: { msg: 'Facility/Branch is required' } }
   },
   status: {

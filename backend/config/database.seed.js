@@ -1,85 +1,29 @@
-const { sequelize } = require('./database');
-const User = require('../models/User');
+const sequelize = require('./database').sequelize;
 
-/**
- * Seed the database with initial data
- */
-const seedDatabase = async () => {
+// Load seeders
+const seedFacilities = require('../seeders/facility.seed');
+const seedUsers = require('../seeders/users.seed'); 
+
+async function seedDatabase() {
   try {
-    console.log('Starting database seeding...');
-    
-    // Sync database (will create tables if they don't exist)
-    await sequelize.sync({ force: true });
-    console.log('Database synced');
+    console.log("🚀 Starting Database Seeding...");
 
-    // Create Radiologist user
-    const radiologist = await User.create({
-      full_name: 'Dr. John Smith',
-      gender: 'Male',
-      date_of_birth: '1980-05-15',
-      username: 'radiologist',
-      email: 'radiologist@example.com',
-      mobile_number: '9876543210',
-      password: 'radio123',
-      role: 'Radiologist',
-      facility_id: 'FAC001',
-      status: 'Active',
-      doctor_id: 'DOC001',
-      registration_number: 'REG123456',
-      specialty: 'Radiology',
-      peer_reviewer: true,
-      reporting_modality_access: ['CT', 'MRI', 'X-Ray']
-    });
-    console.log('Radiologist user created:', radiologist.email);
+    // Sync DB
+    await sequelize.sync({ force: false });
 
-    // Create Technician user
-    const technician = await User.create({
-      full_name: 'Mike Johnson',
-      gender: 'Male',
-      date_of_birth: '1990-08-20',
-      username: 'technician',
-      email: 'technician@example.com',
-      mobile_number: '9876543211',
-      password: 'tech123',
-      role: 'Technician',
-      facility_id: 'FAC001',
-      status: 'Active',
-      employee_id: 'EMP001',
-      department: ['CT', 'MRI'],
-      qualification: 'B.Sc Radiology',
-      experience_years: 5
-    });
-    console.log('Technician user created:', technician.email);
+    // Execute seeds
+    console.log("🔹 Seeding Facilities...");
+    await seedFacilities();
 
-    // Create FrontDesk user
-    const frontdesk = await User.create({
-      full_name: 'Sarah Williams',
-      gender: 'Female',
-      date_of_birth: '1995-03-10',
-      username: 'frontdesk',
-      email: 'frontdesk@example.com',
-      mobile_number: '9876543212',
-      password: 'front123',
-      role: 'FrontDesk',
-      facility_id: 'FAC001',
-      status: 'Active',
-      assigned_counter: 'Counter 1',
-      shift_timing: '9:00 AM - 5:00 PM'
-    });
-    console.log('FrontDesk user created:', frontdesk.email);
+    console.log("🔹 Seeding Users...");
+    await seedUsers();    // <-- call users seeder here
 
-    console.log('Database seeding completed successfully!');
+    console.log("🎉 All Seeds Executed Successfully!");
     process.exit(0);
-  } catch (error) {
-    console.error('Error seeding database:', error);
+  } catch (err) {
+    console.error("❌ Error during seeding:", err);
     process.exit(1);
   }
-};
-
-// Run seeder if called directly
-if (require.main === module) {
-  seedDatabase();
 }
 
-module.exports = seedDatabase;
-
+seedDatabase();

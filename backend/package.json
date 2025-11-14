@@ -7,6 +7,9 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "db:seed": "node config/database.seed.js",
+    "db:fix-facility-fk": "node config/fix-facility-foreign-keys.js",
+    "db:fix-facility-unique": "node config/fix-facility-unique-constraint.js",
+    "db:fix-user-facility-fk": "node config/fix-user-facility-fk.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
