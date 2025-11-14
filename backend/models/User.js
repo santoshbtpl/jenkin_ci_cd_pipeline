@@ -2,108 +2,105 @@ const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const { sequelize } = require('../config/database');
 
-/**
- * User Model - PostgreSQL
- */
-const User = sequelize.define('User', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
-  },
-  name: {
-    type: DataTypes.STRING(50),
+const User = sequelize.define('user', {
+  full_name: {
+    type: DataTypes.STRING,
     allowNull: false,
-    validate: {
-      notEmpty: {
-        msg: 'Please add a name'
-      },
-      len: {
-        args: [2, 50],
-        msg: 'Name must be between 2 and 50 characters'
-      }
-    }
+    validate: { notEmpty: { msg: "Full name is required" } }
+  },
+  gender: {
+    type: DataTypes.ENUM('Male', 'Female', 'Other'),
+    allowNull: false,
+    validate: { notEmpty: { msg: "Gender is required" } }
+  },
+  date_of_birth: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
   },
   username: {
-    type: DataTypes.STRING(50),
+    type: DataTypes.STRING,
     allowNull: false,
-    unique: {
-      msg: 'Username already exists'
-    }
+    unique: { msg: 'username already exists' },
+    validate: { notEmpty: { msg: 'Invalid username format' } }
   },
   email: {
-    type: DataTypes.STRING(100),
+    type: DataTypes.STRING,
     allowNull: false,
-    unique: {
-      msg: 'Email already exists'
-    },
+    unique: { msg: 'Email already exists' },
+    validate: { isEmail: { msg: 'Invalid email format' } }
+  },
+  mobile_number: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: { msg: 'Mobile number already exists' },
     validate: {
-      isEmail: {
-        msg: 'Please add a valid email'
-      },
-      notEmpty: {
-        msg: 'Email is required'
-      }
-    },
-    set(value) {
-      this.setDataValue('email', value.toLowerCase());
+      isNumeric: { msg: 'Mobile number must be numeric' },
+      len: { args: [10, 10], msg: 'Mobile number must be 10 digits' },
     }
   },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
-    validate: {
-      notEmpty: {
-        msg: 'Please add a password'
-      },
-      len: {
-        args: [6, 100],
-        msg: 'Password must be at least 6 characters'
-      }
-    }
   },
   role: {
-    type: DataTypes.ENUM('user', 'admin'),
-    defaultValue: 'user'
+    type: DataTypes.ENUM('Technician', 'FrontDesk', 'Radiologist'),
+    allowNull: false,
+    validate: { notEmpty: { msg: 'Role is required' } }
   },
-  isActive: {
+  facility_id: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: { notEmpty: { msg: 'Facility/Branch is required' } }
+  },
+  status: {
+    type: DataTypes.ENUM('Active', 'Inactive'),
+    defaultValue: 'Inactive'
+  },
+  profile_picture: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+
+  // Technician Fields
+  employee_id: { type: DataTypes.STRING, allowNull: true },
+  department: { type: DataTypes.ARRAY(DataTypes.STRING), allowNull: true },
+  qualification: { type: DataTypes.STRING, allowNull: true },
+  experience_years: { type: DataTypes.INTEGER, allowNull: true },
+  reporting_supervisor: { type: DataTypes.STRING, allowNull: true },
+
+  // FrontDesk Fields
+  assigned_counter: { type: DataTypes.STRING, allowNull: true },
+  shift_timing: { type: DataTypes.STRING, allowNull: true },
+
+  // Radiologist Fields
+  doctor_id: { type: DataTypes.STRING, allowNull: true },
+  registration_number: { type: DataTypes.STRING, allowNull: true },
+  specialty: { type: DataTypes.STRING, allowNull: true },
+  signature: { type: DataTypes.STRING, allowNull: true },
+  peer_reviewer: { type: DataTypes.BOOLEAN, defaultValue: false },
+  reporting_modality_access: { type: DataTypes.ARRAY(DataTypes.STRING), allowNull: true },
+
+  deleted_at: { type: DataTypes.DATE, allowNull: true },
+  is_deleted: {
     type: DataTypes.BOOLEAN,
-    defaultValue: true
-  }
+    defaultValue: false
+  },
+
 }, {
-  tableName: 'users',
   timestamps: true,
-  underscored: true,
   hooks: {
     beforeCreate: async (user) => {
       if (user.password) {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(user.password, salt);
+        user.password = await bcrypt.hash(user.password, 10);
       }
     },
     beforeUpdate: async (user) => {
+      // Only hash if password was changed
       if (user.changed('password')) {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(user.password, salt);
+        user.password = await bcrypt.hash(user.password, 10);
       }
     }
   }
 });
-
-/**
- * Instance method to match password
- */
-User.prototype.matchPassword = async function(enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
-
-/**
- * Remove password from JSON output
- */
-User.prototype.toJSON = function() {
-  const values = { ...this.get() };
-  delete values.password;
-  return values;
-};
 
 module.exports = User;

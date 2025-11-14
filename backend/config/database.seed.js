@@ -12,27 +12,61 @@ const seedDatabase = async () => {
     await sequelize.sync({ force: true });
     console.log('Database synced');
 
-    // Create admin user
-    const admin = await User.create({
-      name: 'Admin User',
-      username: 'admin',
-      email: 'admin@example.com',
-      password: 'admin123',
-      role: 'admin',
-      isActive: true
+    // Create Radiologist user
+    const radiologist = await User.create({
+      full_name: 'Dr. John Smith',
+      gender: 'Male',
+      date_of_birth: '1980-05-15',
+      username: 'radiologist',
+      email: 'radiologist@example.com',
+      mobile_number: '9876543210',
+      password: 'radio123',
+      role: 'Radiologist',
+      facility_id: 'FAC001',
+      status: 'Active',
+      doctor_id: 'DOC001',
+      registration_number: 'REG123456',
+      specialty: 'Radiology',
+      peer_reviewer: true,
+      reporting_modality_access: ['CT', 'MRI', 'X-Ray']
     });
-    console.log('Admin user created:', admin.email);
+    console.log('Radiologist user created:', radiologist.email);
 
-    // Create regular user
-    const user = await User.create({
-      name: 'Test User',
-      username: 'user',
-      email: 'user@example.com',
-      password: 'user123',
-      role: 'user',
-      isActive: true
+    // Create Technician user
+    const technician = await User.create({
+      full_name: 'Mike Johnson',
+      gender: 'Male',
+      date_of_birth: '1990-08-20',
+      username: 'technician',
+      email: 'technician@example.com',
+      mobile_number: '9876543211',
+      password: 'tech123',
+      role: 'Technician',
+      facility_id: 'FAC001',
+      status: 'Active',
+      employee_id: 'EMP001',
+      department: ['CT', 'MRI'],
+      qualification: 'B.Sc Radiology',
+      experience_years: 5
     });
-    console.log('Regular user created:', user.email);
+    console.log('Technician user created:', technician.email);
+
+    // Create FrontDesk user
+    const frontdesk = await User.create({
+      full_name: 'Sarah Williams',
+      gender: 'Female',
+      date_of_birth: '1995-03-10',
+      username: 'frontdesk',
+      email: 'frontdesk@example.com',
+      mobile_number: '9876543212',
+      password: 'front123',
+      role: 'FrontDesk',
+      facility_id: 'FAC001',
+      status: 'Active',
+      assigned_counter: 'Counter 1',
+      shift_timing: '9:00 AM - 5:00 PM'
+    });
+    console.log('FrontDesk user created:', frontdesk.email);
 
     console.log('Database seeding completed successfully!');
     process.exit(0);
